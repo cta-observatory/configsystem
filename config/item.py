@@ -39,3 +39,16 @@ class SimpleItem(ConfigItem):
             return deepcopy(self.default)
         else:
             return self.default
+
+
+class ConfigurableItem(ConfigItem):
+    '''
+    A config item that is itself configurable
+    '''
+    def __init__(self, type, default_config=None, allow_subclasses=True):
+        self.type = type
+        self.default_config = {} if default_config is None else default_config
+
+    def __set__(self, instance, value):
+        if self.allow_subclasses and not isinstance(value, self.type):
+            raise TypeError(f'value must be an instance of type {self.type}')
