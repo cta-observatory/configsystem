@@ -84,3 +84,27 @@ def test_get_config_nested():
 
     m = Main(val=4, sub=Sub(val=42))
     assert m.get_config() == {'val': 4, 'sub': {'val': 42}}
+
+
+def test_get_nonabstract_subclasses():
+    from config import Configurable
+    from abc import ABCMeta, abstractmethod
+
+    class Foo(Configurable):
+        pass
+
+    class Bar(Foo, metaclass=ABCMeta):
+        @abstractmethod
+        def test():
+            pass
+
+    class Baz(Bar, metaclass=ABCMeta):
+        def test():
+            pass
+
+    class Quuz(Foo):
+        pass
+
+    assert Foo.get_nonabstract_subclasses() == {
+        'Foo': Foo, 'Baz': Baz, 'Quuz': Quuz
+    }
