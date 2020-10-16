@@ -22,6 +22,8 @@ class Configurable(metaclass=ConfigurableMeta):
         for k, v in kwargs.items():
             if k in self.__config_items__:
                 setattr(self, k, v)
+            else:
+                raise TypeError(f'__int__ got an unexpected keyword argument {k}')
 
         for k in set(self.__config_items__).difference(kwargs):
             setattr(self, k, self.__config_items__[k].get_default())

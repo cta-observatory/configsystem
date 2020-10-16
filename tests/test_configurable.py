@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_class_definition():
     from config import Configurable, SimpleItem
 
@@ -18,6 +21,10 @@ def test_instantiation():
 
     t = Test(val=10)
     assert t.val == 10
+
+    # assert unknown config raises
+    with pytest.raises(TypeError):
+        Test(foo=10)
 
 
 def test_assignment():
