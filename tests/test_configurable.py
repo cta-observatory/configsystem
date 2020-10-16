@@ -39,6 +39,23 @@ def test_assignment():
     assert t.val == 5
 
 
+def test_config():
+    from config import Configurable, SimpleItem
+
+    class Test(Configurable):
+        val = SimpleItem(default=1)
+
+    t = Test()
+    assert t.val == 1
+
+    t = Test(config={'val': 2})
+    assert t.val == 2
+
+    # test precedence of kwargs over config
+    t = Test(config={'val': 2}, val=3)
+    assert t.val == 3
+
+
 def test_get_config_simple():
     from config import Configurable, SimpleItem
 

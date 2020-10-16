@@ -15,7 +15,7 @@ class ConfigurableMeta(type):
 
 class Configurable(metaclass=ConfigurableMeta):
 
-    def __init__(self, **kwargs):
+    def __init__(self, config=None, **kwargs):
         self.__config__ = {}
 
         # first set all attributes handed in via kwargs
@@ -25,7 +25,16 @@ class Configurable(metaclass=ConfigurableMeta):
             else:
                 raise TypeError(f'__int__ got an unexpected keyword argument {k}')
 
-        for k in set(self.__config_items__).difference(kwargs):
+        already_set = set(kwargs)
+
+        # now the remaining stuff via the config
+        if config is not None:
+            for k in set(config.keys()).difference(already_set):
+                setattr(self, k, config[k])
+                already_set.add(k)
+
+        # instantiate any unset things via the defaults
+        for k in set(self.__config_items__).difference(already_set):
             setattr(self, k, self.__config_items__[k].get_default())
 
     def get_config(self):
