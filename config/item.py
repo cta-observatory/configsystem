@@ -67,7 +67,10 @@ class ConfigurableItem(ConfigItem):
             type_ = config.pop('type')
             subclasses = self.type.get_nonabstract_subclasses()
             if type_ not in subclasses:
-                raise TypeError(f'Unknown type {type_!r}, expected a subclass of {self._type!r}')
+                raise TypeError(
+                    f'Unknown type {type_!r} for item {self.name}'
+                    ', possible values are {list(subclasses)}'
+                )
 
             cls = subclasses[type_]
         else:

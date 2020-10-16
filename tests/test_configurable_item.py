@@ -83,3 +83,6 @@ def test_subclasses():
     bar = Bar(config={'foo': {'type': 'SubFoo', 'val': 2}})
     assert isinstance(bar.foo, SubFoo)
     assert bar.foo.val == 2
+
+    with pytest.raises(TypeError):
+        Bar(config={'foo': {'type': 'blabla', 'val': 2}})
