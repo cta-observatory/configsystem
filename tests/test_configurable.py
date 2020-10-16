@@ -70,14 +70,14 @@ def test_get_config_simple():
 
 
 def test_get_config_nested():
-    from config import Configurable, SimpleItem
+    from config import Configurable, SimpleItem, ConfigurableItem
 
     class Sub(Configurable):
         val = SimpleItem()
 
     class Main(Configurable):
         val = SimpleItem()
-        sub = SimpleItem(default=Sub(val=10))
+        sub = ConfigurableItem(Sub, default_config=dict(val=10))
 
     m = Main()
     assert m.get_config() == {'val': None, 'sub': {'val': 10}}
