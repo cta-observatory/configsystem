@@ -1,34 +1,22 @@
 from inspect import isabstract
-from abc import ABCMeta
 
 from .item import ConfigItem
 
 
-# to enable abstract configurables, the metaclass
-# has to inherit from ABCMeta
-class ConfigurableMeta(ABCMeta):
-    def __new__(cls, name, bases, dct):
-
-        dct['__config_items__'] = {}
+class Configurable:
+    def __init_subclass__(cls):
+        cls.__config_items__ = {}
 
         # inherit config items
-        for b in bases:
-            if issubclass(b, Configurable):
+        for b in cls.__bases__:
+            if hasattr(b, '__config_items__'):
                 for k, v in b.__config_items__.items():
-                    dct["__config_items__"][k] = v
+                    cls.__config_items__[k] = v
 
         # but local ones override those of the base classes
-        for k, v in dct.items():
-            if isinstance(dct[k], ConfigItem):
-                dct['__config_items__'][k] = v
-
-        new_cls = super().__new__(cls, name, bases, dct)
-        return new_cls
-
-
-class Configurable(metaclass=ConfigurableMeta):
-
-    _non_abstract_subclasses = {}
+        for k, v in cls.__dict__.items():
+            if isinstance(v, ConfigItem):
+                cls.__config_items__[k] = v
 
     def __init__(self, config=None, **kwargs):
         self.__config__ = {}
@@ -38,7 +26,9 @@ class Configurable(metaclass=ConfigurableMeta):
             if k in self.__config_items__:
                 setattr(self, k, v)
             else:
-                raise TypeError(f'__int__ got an unexpected keyword argument {k}')
+                raise TypeError(
+                    f'__init__ got an unexpected keyword argument {k}'
+                )
 
         already_set = set(kwargs)
 
