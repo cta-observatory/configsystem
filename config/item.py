@@ -16,9 +16,6 @@ class ConfigItem(metaclass=ABCMeta):
     def __set__(self, instance, value):
         instance.__config__[self.name] = value
 
-    def __delete__(self, instance):
-        del instance.__delete__[self.name]
-
     @abstractmethod
     def from_config(self, config):
         pass
