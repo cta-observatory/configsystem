@@ -4,7 +4,6 @@ from copy import deepcopy
 
 
 class ConfigItem(metaclass=ABCMeta):
-
     def __get__(self, instance, owner=None):
         if instance is None:
             return self

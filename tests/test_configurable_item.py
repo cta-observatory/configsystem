@@ -49,6 +49,69 @@ def test_default_nested():
     assert baz.bar.foo.val == 3
 
 
+def test_config_nested():
+    from config import Configurable, SimpleItem, ConfigurableItem
+
+    class Foo(Configurable):
+        val = SimpleItem(default=1)
+
+    class Bar(Configurable):
+        val = SimpleItem(default=2)
+        foo = ConfigurableItem(Foo, default_config={'val': 3})
+
+    # test with empty config
+    b = Bar(config={})
+    assert b.val == 2
+    assert b.foo.val == 3
+
+    # only some things configured
+    # TODO: which default_config should be used? This right now
+    # overrides the config of Bar.foo.val with the Foo.val default.
+    # which from a certain point of view makes sense.
+    b = Bar(config={'foo': {}})
+    assert b.val == 2
+    assert b.foo.val == 1
+
+    b = Bar(config={'val': 5})
+    assert b.val == 5
+    assert b.foo.val == 3
+
+
+def test_deeply_nested():
+    from config import Configurable, SimpleItem, ConfigurableItem
+
+    class Foo(Configurable):
+        val = SimpleItem(default=1)
+
+    class Bar(Configurable):
+        val = SimpleItem(default=2)
+        foo = ConfigurableItem(Foo)
+
+    class Baz(Configurable):
+        foo = ConfigurableItem(Foo, default_config={'val': 5})
+        bar1 = ConfigurableItem(Bar)
+        bar2 = ConfigurableItem(
+            Bar, default_config={'val': 3, 'foo': {'val': 4}}
+        )
+
+    b = Baz()
+    assert b.get_config() == {
+        'foo': {'val': 5},
+        'bar1': {'val': 2, 'foo': {'val': 1}},
+        'bar2': {'val': 3, 'foo': {'val': 4}},
+    }
+    assert b.foo.val == 5
+    assert b.bar1.val == 2
+    assert b.bar1.foo.val == 1
+    assert b.bar2.val == 3
+    assert b.bar2.foo.val == 4
+
+    b = Baz(bar1=Bar(foo=Foo(val=10)))
+    assert b.bar1.foo.val == 10
+    assert b.bar1.val == 2
+    assert b.bar2.foo.val == 4
+
+
 def test_two_of_same_class():
     from config import Configurable, ConfigurableItem, SimpleItem
 

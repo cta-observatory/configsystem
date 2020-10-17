@@ -1,10 +1,16 @@
 from inspect import isabstract
 
-from .item import ConfigItem
+from .item import ConfigItem, ConfigurableItem
 
 
 class Configurable:
     def __init_subclass__(cls):
+        '''
+        Called when a new subclass of Configurable is created
+
+        Sets up the ``__config_items__`` dict as a class member
+        and inherits the config items from the base classes.
+        '''
         cls.__config_items__ = {}
 
         # inherit config items
@@ -19,6 +25,15 @@ class Configurable:
                 cls.__config_items__[k] = v
 
     def __init__(self, config=None, **kwargs):
+        '''
+        Initialize a new configurable instance.
+
+        All configurable items can be passed also as kwargs
+        and then take precedence over the values specified in ``config``.
+
+        All config items not specified in config or kwargs are instantiated
+        from their defaults.
+        '''
         self.__config__ = {}
 
         # first set all attributes handed in via kwargs
@@ -47,12 +62,33 @@ class Configurable:
             setattr(self, k, self.__config_items__[k].get_default())
 
     def get_config(self):
+        '''
+        Get the current config of an instance as dict.
+        '''
         config = {}
         for k, v in self.__config__.items():
             if isinstance(v, Configurable):
                 config[k] = v.get_config()
             else:
                 config[k] = v
+
+        return config
+
+    @classmethod
+    def get_default_config(cls):
+        '''
+        Returns the default config of this class as dict.
+        '''
+        config = {}
+        for k, v in cls.__config_items__.items():
+            if isinstance(v, ConfigurableItem):
+                # the default might be a subclass, so
+                # we instantiate the default and get its config and type
+                default = v.get_default()
+                config[k] = default.get_config()
+                config[k]['type'] = default.__class__.__name__
+            else:
+                config[k] = v.get_default()
 
         return config
 
