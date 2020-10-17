@@ -86,6 +86,40 @@ def test_get_config_nested():
     assert m.get_config() == {'val': 4, 'sub': {'val': 42}}
 
 
+def test_get_default_config():
+    from config import Configurable, SimpleItem, ConfigurableItem
+
+    class Foo(Configurable):
+        val = SimpleItem()
+
+    class Main(Configurable):
+        val = SimpleItem()
+        foo = ConfigurableItem(Foo, default_config=dict(val=10))
+
+    m = Main()
+    assert m.get_config() == Main.get_default_config()
+
+    # test with subclass
+    class Foo(Configurable):
+        val1 = SimpleItem(1)
+
+    class Sub(Foo):
+        val2 = SimpleItem(2)
+
+    class Main(Configurable):
+        val = SimpleItem()
+        foo = ConfigurableItem(
+            Foo,
+            default_config={'cls': 'Sub', 'val1': 3, 'val2': 4},
+        )
+
+    m = Main()
+    assert isinstance(m.foo, Sub)
+    assert m.foo.val1 == 3
+    assert m.foo.val2 == 4
+    assert m.get_config() == Main.get_default_config()
+
+
 def test_get_nonabstract_subclasses():
     from config import Configurable
     from abc import ABCMeta, abstractmethod

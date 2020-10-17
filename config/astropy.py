@@ -1,12 +1,13 @@
-from collections.abc import Mapping
-from .item import SimpleItem
-
 try:
     import astropy.units as u
 except ImportError:
     raise ImportError(
         'You need ``astropy`` to uses the config items from this module'
     ) from None
+
+from collections.abc import Mapping
+
+from .items import SimpleItem
 
 
 class QuantityItem(SimpleItem):

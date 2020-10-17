@@ -8,7 +8,7 @@ def test_simple():
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableItem(type=Foo)
+        foo = ConfigurableItem(cls=Foo)
 
     bar = Bar()
     assert isinstance(bar.foo, Foo)
@@ -25,7 +25,7 @@ def test_default_config():
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableItem(type=Foo, default_config={'val': 2})
+        foo = ConfigurableItem(cls=Foo, default_config={'val': 2})
 
     bar = Bar()
     assert isinstance(bar.foo, Foo)
@@ -39,10 +39,10 @@ def test_default_nested():
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableItem(type=Foo, default_config={'val': 2})
+        foo = ConfigurableItem(cls=Foo, default_config={'val': 2})
 
     class Baz(Configurable):
-        bar = ConfigurableItem(type=Bar, default_config={'foo': {'val': 3}})
+        bar = ConfigurableItem(cls=Bar, default_config={'foo': {'val': 3}})
 
     baz = Baz()
     assert isinstance(baz.bar.foo, Foo)
@@ -119,8 +119,8 @@ def test_two_of_same_class():
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
-        foo1 = ConfigurableItem(type=Foo, default_config={'val': 2})
-        foo2 = ConfigurableItem(type=Foo, default_config={'val': 3})
+        foo1 = ConfigurableItem(cls=Foo, default_config={'val': 2})
+        foo2 = ConfigurableItem(cls=Foo, default_config={'val': 3})
 
     bar = Bar()
     assert bar.foo1.val == 2
@@ -141,11 +141,11 @@ def test_subclasses():
         pass
 
     class Bar(Configurable):
-        foo = ConfigurableItem(type=Foo)
+        foo = ConfigurableItem(cls=Foo)
 
-    bar = Bar(config={'foo': {'type': 'SubFoo', 'val': 2}})
+    bar = Bar(config={'foo': {'cls': 'SubFoo', 'val': 2}})
     assert isinstance(bar.foo, SubFoo)
     assert bar.foo.val == 2
 
     with pytest.raises(TypeError):
-        Bar(config={'foo': {'type': 'blabla', 'val': 2}})
+        Bar(config={'foo': {'cls': 'blabla', 'val': 2}})

@@ -1,6 +1,5 @@
 from inspect import isabstract
-
-from .item import ConfigItem, ConfigurableItem
+from .item import ConfigItem
 
 
 class Configurable:
@@ -65,10 +64,17 @@ class Configurable:
         '''
         Get the current config of an instance as dict.
         '''
+        # to avoid circular import
+        from .items import ConfigurableItem
+
         config = {}
-        for k, v in self.__config__.items():
-            if isinstance(v, Configurable):
+        for k, item in self.__config_items__.items():
+            v = self.__config__[k]
+            if isinstance(item, ConfigurableItem):
                 config[k] = v.get_config()
+                # if the value is actually a subclass, we need include the name
+                if v.__class__ is not item.cls:
+                    config[k]['cls'] = v.__class__.__name__
             else:
                 config[k] = v
 
@@ -79,18 +85,10 @@ class Configurable:
         '''
         Returns the default config of this class as dict.
         '''
-        config = {}
-        for k, v in cls.__config_items__.items():
-            if isinstance(v, ConfigurableItem):
-                # the default might be a subclass, so
-                # we instantiate the default and get its config and type
-                default = v.get_default()
-                config[k] = default.get_config()
-                config[k]['type'] = default.__class__.__name__
-            else:
-                config[k] = v.get_default()
-
-        return config
+        return {
+            k: item.get_default_config()
+            for k, item in cls.__config_items__.items()
+        }
 
     @classmethod
     def get_nonabstract_subclasses(cls):
@@ -110,3 +108,18 @@ class Configurable:
             subclasses.update(subcls.get_nonabstract_subclasses())
 
         return subclasses
+
+    @classmethod
+    def get_nonabstract_subclass(cls, name):
+        '''
+        Get all non-abstract children of this class
+        '''
+        subclasses = cls.get_nonabstract_subclasses()
+
+        if name not in subclasses:
+            raise TypeError(
+                f'Unknown subclass {name!r} for class {cls}'
+                f', possible values are {list(subclasses)}'
+            )
+
+        return subclasses[name]
