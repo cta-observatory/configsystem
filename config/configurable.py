@@ -123,3 +123,7 @@ class Configurable:
             )
 
         return subclasses[name]
+
+    def __repr__(self):
+        configs = ', '.join(f'{k}={v!r}' for k, v in self.__config__.items())
+        return f'{self.__class__.__name__}({configs})'

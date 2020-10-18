@@ -2,19 +2,19 @@ import pytest
 
 
 def test_class_definition():
-    from config import Configurable, SimpleItem
+    from config import Configurable, ObjectItem
 
     class Test(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
 
     assert 'val' in Test.__config_items__
 
 
 def test_instantiation():
-    from config import Configurable, SimpleItem
+    from config import Configurable, ObjectItem
 
     class Test(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
 
     t = Test()
     assert t.val is None
@@ -28,10 +28,10 @@ def test_instantiation():
 
 
 def test_assignment():
-    from config import Configurable, SimpleItem
+    from config import Configurable, ObjectItem
 
     class Test(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
 
     t = Test()
     assert t.val is None
@@ -40,10 +40,10 @@ def test_assignment():
 
 
 def test_config():
-    from config import Configurable, SimpleItem
+    from config import Configurable, ObjectItem
 
     class Test(Configurable):
-        val = SimpleItem(default=1)
+        val = ObjectItem(default=1)
 
     t = Test()
     assert t.val == 1
@@ -57,10 +57,10 @@ def test_config():
 
 
 def test_get_config_simple():
-    from config import Configurable, SimpleItem
+    from config import Configurable, ObjectItem
 
     class Test(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
 
     t = Test()
     assert t.get_config() == {'val': None}
@@ -70,13 +70,13 @@ def test_get_config_simple():
 
 
 def test_get_config_nested():
-    from config import Configurable, SimpleItem, ConfigurableClassItem
+    from config import Configurable, ObjectItem, ConfigurableClassItem
 
     class Sub(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
 
     class Main(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
         sub = ConfigurableClassItem(Sub, default_config=dict(val=10))
 
     m = Main()
@@ -87,13 +87,13 @@ def test_get_config_nested():
 
 
 def test_get_default_config():
-    from config import Configurable, SimpleItem, ConfigurableClassItem
+    from config import Configurable, ObjectItem, ConfigurableClassItem
 
     class Foo(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
 
     class Main(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
         foo = ConfigurableClassItem(Foo, default_config=dict(val=10))
 
     m = Main()
@@ -101,13 +101,13 @@ def test_get_default_config():
 
     # test with subclass
     class Foo(Configurable):
-        val1 = SimpleItem(1)
+        val1 = ObjectItem(1)
 
     class Sub(Foo):
-        val2 = SimpleItem(2)
+        val2 = ObjectItem(2)
 
     class Main(Configurable):
-        val = SimpleItem()
+        val = ObjectItem()
         foo = ConfigurableClassItem(
             Foo,
             default_config={'cls': 'Sub', 'val1': 3, 'val2': 4},

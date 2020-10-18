@@ -4,9 +4,9 @@ from .item import ConfigItem
 from .configurable import Configurable
 
 
-class SimpleItem(ConfigItem):
+class ObjectItem(ConfigItem):
     '''
-    A config item consisting of a simple python value.
+    A config item consisting of a single python object.
     No nested configuration supported
     '''
 

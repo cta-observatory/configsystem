@@ -9,6 +9,9 @@ class ConfigItem(metaclass=ABCMeta):
     Each ConfigItem describes one configurable member variable
     of the instances.
     '''
+    def __init__(self, help):
+        self.help = help
+
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
@@ -31,3 +34,11 @@ class ConfigItem(metaclass=ABCMeta):
     @abstractmethod
     def get_default_config(self):
         pass
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}('
+            f'name={self.name}'
+            f', default={self.get_default()}'
+            ')'
+        )

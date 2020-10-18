@@ -2,10 +2,10 @@ import pytest
 
 
 def test_simple():
-    from config import Configurable, ConfigurableClassItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, ObjectItem
 
     class Foo(Configurable):
-        val = SimpleItem(default=1)
+        val = ObjectItem(default=1)
 
     class Bar(Configurable):
         foo = ConfigurableClassItem(cls=Foo)
@@ -19,10 +19,10 @@ def test_simple():
 
 
 def test_default_config():
-    from config import Configurable, ConfigurableClassItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, ObjectItem
 
     class Foo(Configurable):
-        val = SimpleItem(default=1)
+        val = ObjectItem(default=1)
 
     class Bar(Configurable):
         foo = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
@@ -33,10 +33,10 @@ def test_default_config():
 
 
 def test_default_nested():
-    from config import Configurable, ConfigurableClassItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, ObjectItem
 
     class Foo(Configurable):
-        val = SimpleItem(default=1)
+        val = ObjectItem(default=1)
 
     class Bar(Configurable):
         foo = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
@@ -50,13 +50,13 @@ def test_default_nested():
 
 
 def test_config_nested():
-    from config import Configurable, SimpleItem, ConfigurableClassItem
+    from config import Configurable, ObjectItem, ConfigurableClassItem
 
     class Foo(Configurable):
-        val = SimpleItem(default=1)
+        val = ObjectItem(default=1)
 
     class Bar(Configurable):
-        val = SimpleItem(default=2)
+        val = ObjectItem(default=2)
         foo = ConfigurableClassItem(Foo, default_config={'val': 3})
 
     # test with empty config
@@ -78,13 +78,13 @@ def test_config_nested():
 
 
 def test_deeply_nested():
-    from config import Configurable, SimpleItem, ConfigurableClassItem
+    from config import Configurable, ObjectItem, ConfigurableClassItem
 
     class Foo(Configurable):
-        val = SimpleItem(default=1)
+        val = ObjectItem(default=1)
 
     class Bar(Configurable):
-        val = SimpleItem(default=2)
+        val = ObjectItem(default=2)
         foo = ConfigurableClassItem(Foo)
 
     class Baz(Configurable):
@@ -113,10 +113,10 @@ def test_deeply_nested():
 
 
 def test_two_of_same_class():
-    from config import Configurable, ConfigurableClassItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, ObjectItem
 
     class Foo(Configurable):
-        val = SimpleItem(default=1)
+        val = ObjectItem(default=1)
 
     class Bar(Configurable):
         foo1 = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
@@ -132,10 +132,10 @@ def test_two_of_same_class():
 
 
 def test_subclasses():
-    from config import Configurable, ConfigurableClassItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, ObjectItem
 
     class Foo(Configurable):
-        val = SimpleItem(default=1)
+        val = ObjectItem(default=1)
 
     class SubFoo(Foo):
         pass

@@ -7,10 +7,10 @@ except ImportError:
 
 from collections.abc import Mapping
 
-from .items import SimpleItem
+from .items import ObjectItem
 
 
-class QuantityItem(SimpleItem):
+class QuantityItem(ObjectItem):
 
     def __init__(self, default=None, unit=None, allow_none=True):
         super().__init__(default, copy_default=True)
