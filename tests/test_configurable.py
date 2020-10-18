@@ -70,14 +70,14 @@ def test_get_config_simple():
 
 
 def test_get_config_nested():
-    from config import Configurable, SimpleItem, ConfigurableItem
+    from config import Configurable, SimpleItem, ConfigurableClassItem
 
     class Sub(Configurable):
         val = SimpleItem()
 
     class Main(Configurable):
         val = SimpleItem()
-        sub = ConfigurableItem(Sub, default_config=dict(val=10))
+        sub = ConfigurableClassItem(Sub, default_config=dict(val=10))
 
     m = Main()
     assert m.get_config() == {'val': None, 'sub': {'val': 10}}
@@ -87,14 +87,14 @@ def test_get_config_nested():
 
 
 def test_get_default_config():
-    from config import Configurable, SimpleItem, ConfigurableItem
+    from config import Configurable, SimpleItem, ConfigurableClassItem
 
     class Foo(Configurable):
         val = SimpleItem()
 
     class Main(Configurable):
         val = SimpleItem()
-        foo = ConfigurableItem(Foo, default_config=dict(val=10))
+        foo = ConfigurableClassItem(Foo, default_config=dict(val=10))
 
     m = Main()
     assert m.get_config() == Main.get_default_config()
@@ -108,7 +108,7 @@ def test_get_default_config():
 
     class Main(Configurable):
         val = SimpleItem()
-        foo = ConfigurableItem(
+        foo = ConfigurableClassItem(
             Foo,
             default_config={'cls': 'Sub', 'val1': 3, 'val2': 4},
         )

@@ -2,13 +2,13 @@ import pytest
 
 
 def test_simple():
-    from config import Configurable, ConfigurableItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, SimpleItem
 
     class Foo(Configurable):
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableItem(cls=Foo)
+        foo = ConfigurableClassItem(cls=Foo)
 
     bar = Bar()
     assert isinstance(bar.foo, Foo)
@@ -19,13 +19,13 @@ def test_simple():
 
 
 def test_default_config():
-    from config import Configurable, ConfigurableItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, SimpleItem
 
     class Foo(Configurable):
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableItem(cls=Foo, default_config={'val': 2})
+        foo = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
 
     bar = Bar()
     assert isinstance(bar.foo, Foo)
@@ -33,16 +33,16 @@ def test_default_config():
 
 
 def test_default_nested():
-    from config import Configurable, ConfigurableItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, SimpleItem
 
     class Foo(Configurable):
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableItem(cls=Foo, default_config={'val': 2})
+        foo = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
 
     class Baz(Configurable):
-        bar = ConfigurableItem(cls=Bar, default_config={'foo': {'val': 3}})
+        bar = ConfigurableClassItem(cls=Bar, default_config={'foo': {'val': 3}})
 
     baz = Baz()
     assert isinstance(baz.bar.foo, Foo)
@@ -50,14 +50,14 @@ def test_default_nested():
 
 
 def test_config_nested():
-    from config import Configurable, SimpleItem, ConfigurableItem
+    from config import Configurable, SimpleItem, ConfigurableClassItem
 
     class Foo(Configurable):
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
         val = SimpleItem(default=2)
-        foo = ConfigurableItem(Foo, default_config={'val': 3})
+        foo = ConfigurableClassItem(Foo, default_config={'val': 3})
 
     # test with empty config
     b = Bar(config={})
@@ -78,19 +78,19 @@ def test_config_nested():
 
 
 def test_deeply_nested():
-    from config import Configurable, SimpleItem, ConfigurableItem
+    from config import Configurable, SimpleItem, ConfigurableClassItem
 
     class Foo(Configurable):
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
         val = SimpleItem(default=2)
-        foo = ConfigurableItem(Foo)
+        foo = ConfigurableClassItem(Foo)
 
     class Baz(Configurable):
-        foo = ConfigurableItem(Foo, default_config={'val': 5})
-        bar1 = ConfigurableItem(Bar)
-        bar2 = ConfigurableItem(
+        foo = ConfigurableClassItem(Foo, default_config={'val': 5})
+        bar1 = ConfigurableClassItem(Bar)
+        bar2 = ConfigurableClassItem(
             Bar, default_config={'val': 3, 'foo': {'val': 4}}
         )
 
@@ -113,14 +113,14 @@ def test_deeply_nested():
 
 
 def test_two_of_same_class():
-    from config import Configurable, ConfigurableItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, SimpleItem
 
     class Foo(Configurable):
         val = SimpleItem(default=1)
 
     class Bar(Configurable):
-        foo1 = ConfigurableItem(cls=Foo, default_config={'val': 2})
-        foo2 = ConfigurableItem(cls=Foo, default_config={'val': 3})
+        foo1 = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
+        foo2 = ConfigurableClassItem(cls=Foo, default_config={'val': 3})
 
     bar = Bar()
     assert bar.foo1.val == 2
@@ -132,7 +132,7 @@ def test_two_of_same_class():
 
 
 def test_subclasses():
-    from config import Configurable, ConfigurableItem, SimpleItem
+    from config import Configurable, ConfigurableClassItem, SimpleItem
 
     class Foo(Configurable):
         val = SimpleItem(default=1)
@@ -141,7 +141,7 @@ def test_subclasses():
         pass
 
     class Bar(Configurable):
-        foo = ConfigurableItem(cls=Foo)
+        foo = ConfigurableClassItem(cls=Foo)
 
     bar = Bar(config={'foo': {'cls': 'SubFoo', 'val': 2}})
     assert isinstance(bar.foo, SubFoo)

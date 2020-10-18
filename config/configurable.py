@@ -65,12 +65,12 @@ class Configurable:
         Get the current config of an instance as dict.
         '''
         # to avoid circular import
-        from .items import ConfigurableItem
+        from .items import ConfigurableClassItem
 
         config = {}
         for k, item in self.__config_items__.items():
             v = self.__config__[k]
-            if isinstance(item, ConfigurableItem):
+            if isinstance(item, ConfigurableClassItem):
                 config[k] = v.get_config()
                 # if the value is actually a subclass, we need include the name
                 if v.__class__ is not item.cls:

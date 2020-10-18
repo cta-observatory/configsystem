@@ -27,7 +27,7 @@ class SimpleItem(ConfigItem):
         return self.default
 
 
-class ConfigurableItem(ConfigItem):
+class ConfigurableClassItem(ConfigItem):
     '''
     A config item that is itself configurable
     '''
