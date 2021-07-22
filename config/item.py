@@ -25,14 +25,17 @@ class ConfigItem(metaclass=ABCMeta):
 
     @abstractmethod
     def from_config(self, config):
+        '''Create the value from its config representation'''
         pass
 
     @abstractmethod
     def get_default(self):
+        '''Return a new instance created from the default configuration'''
         pass
 
     @abstractmethod
     def get_default_config(self):
+        '''Return the default configuration'''
         pass
 
     def __repr__(self):
