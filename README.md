@@ -1,4 +1,4 @@
-# Prototyping a config system for ctapipe and other other uses
+# Prototyping a config system for ctapipe and others
 
 
 ## Requirements
