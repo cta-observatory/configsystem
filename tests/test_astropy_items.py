@@ -1,4 +1,5 @@
 import pytest
+from config.exceptions import ConfigError
 
 
 def test_quantity_simple():
@@ -8,7 +9,7 @@ def test_quantity_simple():
     from config.astropy import QuantityItem
 
     class Test(Configurable):
-        q = QuantityItem()
+        q = QuantityItem(help='')
 
     t = Test()
     t.q = 5
@@ -34,10 +35,10 @@ def test_quantity_unit():
     from config.astropy import QuantityItem
 
     class Test(Configurable):
-        q = QuantityItem(unit=u.m)
+        q = QuantityItem(unit=u.m, help='')
 
     t = Test()
-    with pytest.raises(ValueError):
+    with pytest.raises(ConfigError):
         t.q = 5
 
 
@@ -48,8 +49,8 @@ def test_quantity_allow_none():
     from config.astropy import QuantityItem
 
     class Test(Configurable):
-        q = QuantityItem(default=1 * u.m, unit=u.m, allow_none=False)
+        q = QuantityItem(default=1 * u.m, unit=u.m, allow_none=False, help='')
 
     t = Test()
-    with pytest.raises(ValueError):
+    with pytest.raises(ConfigError):
         t.q = None

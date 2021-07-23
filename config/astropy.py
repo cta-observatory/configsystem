@@ -7,32 +7,33 @@ except ImportError:
 
 from collections.abc import Mapping
 
-from .items import ObjectItem
+from .items import Object, ConfigError
 
 
-class QuantityItem(ObjectItem):
+class QuantityItem(Object):
 
-    def __init__(self, default=None, unit=None, allow_none=True):
-        super().__init__(default, copy_default=True)
-        self.allow_none = allow_none
-        if self.default is None and not self.allow_none:
-            raise ValueError('Default is None but allow_none=False')
+    def __init__(self, unit=None, **kwargs):
+        super().__init__(**kwargs)
         self.unit = unit
 
-    def __set__(self, instance, value):
+    def validate(self, value):
+        value = super().validate(value)
         if value is None:
-            if not self.allow_none:
-                raise ValueError(
-                    f'{instance.__class__} config {self.name} must not be None'
-                )
-        else:
+            return
+
+        try:
             value = u.Quantity(value, copy=False)
+        except ValueError:
+            raise ConfigError(self.configurable(), self, value, f"must be a valid input to Quantity")
 
-            # verify unit if one is required
-            if self.unit is not None:
+        # verify unit if one is required
+        if self.unit is not None:
+            try:
                 value = value.to(self.unit)
+            except ValueError:
+                raise ConfigError(self.configurable(), self, value, f"must be convertible to {self.unit}")
 
-        super().__set__(instance, value)
+        return value
 
     def from_config(self, config_value):
         if isinstance(config_value, u.Quantity):
@@ -44,3 +45,8 @@ class QuantityItem(ObjectItem):
                 'Config value for QuantityItem must be a Quantity or dict'
                 f', got {config_value}'
             )
+
+    def from_string(self, string):
+        if string == 'None':
+            return self.validate(None)
+        return self.validate(string)

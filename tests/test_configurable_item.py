@@ -1,31 +1,32 @@
 import pytest
+from config.exceptions import ConfigError
 
 
 def test_simple():
-    from config import Configurable, ConfigurableClassItem, ObjectItem
+    from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = ObjectItem(default=1)
+        val = Int(default=1, help='')
 
     class Bar(Configurable):
-        foo = ConfigurableClassItem(cls=Foo)
+        foo = ConfigurableInstance(cls=Foo, help='')
 
     bar = Bar()
     assert isinstance(bar.foo, Foo)
     assert bar.foo.val == 1
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ConfigError):
         bar.foo = 1
 
 
 def test_default_config():
-    from config import Configurable, ConfigurableClassItem, ObjectItem
+    from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = ObjectItem(default=1)
+        val = Int(default=1, help='')
 
     class Bar(Configurable):
-        foo = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
+        foo = ConfigurableInstance(cls=Foo, default_config={'val': 2}, help='')
 
     bar = Bar()
     assert isinstance(bar.foo, Foo)
@@ -33,16 +34,16 @@ def test_default_config():
 
 
 def test_default_nested():
-    from config import Configurable, ConfigurableClassItem, ObjectItem
+    from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = ObjectItem(default=1)
+        val = Int(default=1, help='')
 
     class Bar(Configurable):
-        foo = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
+        foo = ConfigurableInstance(cls=Foo, default_config={'val': 2}, help='')
 
     class Baz(Configurable):
-        bar = ConfigurableClassItem(cls=Bar, default_config={'foo': {'val': 3}})
+        bar = ConfigurableInstance(cls=Bar, default_config={'foo': {'val': 3}}, help='')
 
     baz = Baz()
     assert isinstance(baz.bar.foo, Foo)
@@ -50,14 +51,14 @@ def test_default_nested():
 
 
 def test_config_nested():
-    from config import Configurable, ObjectItem, ConfigurableClassItem
+    from config import Configurable, Int, ConfigurableInstance
 
     class Foo(Configurable):
-        val = ObjectItem(default=1)
+        val = Int(default=1, help='')
 
     class Bar(Configurable):
-        val = ObjectItem(default=2)
-        foo = ConfigurableClassItem(Foo, default_config={'val': 3})
+        val = Int(default=2, help='')
+        foo = ConfigurableInstance(Foo, default_config={'val': 3}, help='')
 
     # test with empty config
     b = Bar(config={})
@@ -78,20 +79,20 @@ def test_config_nested():
 
 
 def test_deeply_nested():
-    from config import Configurable, ObjectItem, ConfigurableClassItem
+    from config import Configurable, Int, ConfigurableInstance
 
     class Foo(Configurable):
-        val = ObjectItem(default=1)
+        val = Int(default=1, help='')
 
     class Bar(Configurable):
-        val = ObjectItem(default=2)
-        foo = ConfigurableClassItem(Foo)
+        val = Int(default=2, help='')
+        foo = ConfigurableInstance(Foo, help='')
 
     class Baz(Configurable):
-        foo = ConfigurableClassItem(Foo, default_config={'val': 5})
-        bar1 = ConfigurableClassItem(Bar)
-        bar2 = ConfigurableClassItem(
-            Bar, default_config={'val': 3, 'foo': {'val': 4}}
+        foo = ConfigurableInstance(Foo, default_config={'val': 5}, help='')
+        bar1 = ConfigurableInstance(Bar, help='')
+        bar2 = ConfigurableInstance(
+            Bar, default_config={'val': 3, 'foo': {'val': 4}}, help=''
         )
 
     b = Baz()
@@ -113,14 +114,14 @@ def test_deeply_nested():
 
 
 def test_two_of_same_class():
-    from config import Configurable, ConfigurableClassItem, ObjectItem
+    from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = ObjectItem(default=1)
+        val = Int(default=1, help='')
 
     class Bar(Configurable):
-        foo1 = ConfigurableClassItem(cls=Foo, default_config={'val': 2})
-        foo2 = ConfigurableClassItem(cls=Foo, default_config={'val': 3})
+        foo1 = ConfigurableInstance(cls=Foo, default_config={'val': 2}, help='')
+        foo2 = ConfigurableInstance(cls=Foo, default_config={'val': 3}, help='')
 
     bar = Bar()
     assert bar.foo1.val == 2
@@ -132,20 +133,20 @@ def test_two_of_same_class():
 
 
 def test_subclasses():
-    from config import Configurable, ConfigurableClassItem, ObjectItem
+    from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = ObjectItem(default=1)
+        val = Int(default=1, help='')
 
     class SubFoo(Foo):
         pass
 
     class Bar(Configurable):
-        foo = ConfigurableClassItem(cls=Foo)
+        foo = ConfigurableInstance(cls=Foo, help='')
 
     bar = Bar(config={'foo': {'cls': 'SubFoo', 'val': 2}})
     assert isinstance(bar.foo, SubFoo)
     assert bar.foo.val == 2
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ConfigError):
         Bar(config={'foo': {'cls': 'blabla', 'val': 2}})

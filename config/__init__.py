@@ -1,11 +1,12 @@
 from .configurable import Configurable
-from .item import ConfigItem
-from .items import ObjectItem, ConfigurableClassItem
+from .item import Item
+from .items import Object, ConfigurableInstance, Int
 
 
 __all__ = [
     'Configurable',
-    'ConfigItem',
-    'ObjectItem',
-    'ConfigurableClassItem',
+    'Item',
+    'Object',
+    'ConfigurableInstance',
+    'Int',
 ]

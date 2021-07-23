@@ -1,5 +1,7 @@
 from inspect import isabstract
-from .item import ConfigItem
+from collections.abc import Mapping
+
+from .item import Item
 
 
 class Configurable:
@@ -7,21 +9,22 @@ class Configurable:
         '''
         Called when a new subclass of Configurable is created
 
-        Sets up the ``__config_items__`` dict as a class member
+        Sets up the ``__config__`` dict as a class member
         and inherits the config items from the base classes.
         '''
-        cls.__config_items__ = {}
+        cls.__config__ = {}
+
 
         # inherit config items
         for b in cls.__bases__:
-            if hasattr(b, '__config_items__'):
-                for k, v in b.__config_items__.items():
-                    cls.__config_items__[k] = v
+            if hasattr(b, '__config__'):
+                for k, v in b.__config__.items():
+                    cls.__config__[k] = v
 
         # but local ones override those of the base classes
         for k, v in cls.__dict__.items():
-            if isinstance(v, ConfigItem):
-                cls.__config_items__[k] = v
+            if isinstance(v, Item):
+                cls.__config__[k] = v
 
     def __init__(self, config=None, **kwargs):
         '''
@@ -33,11 +36,9 @@ class Configurable:
         All config items not specified in config or kwargs are instantiated
         from their defaults.
         '''
-        self.__config__ = {}
-
         # first set all attributes handed in via kwargs
         for k, v in kwargs.items():
-            if k in self.__config_items__:
+            if k in self.__config__:
                 setattr(self, k, v)
             else:
                 raise TypeError(
@@ -48,29 +49,32 @@ class Configurable:
 
         # now the remaining stuff via the config
         if config is not None:
+            if not isinstance(config, Mapping):
+                raise TypeError(f"config must be a mapping, got {config}")
+
             for k in set(config.keys()).difference(already_set):
-                if k not in self.__config_items__:
+                if k not in self.__config__:
                     raise ValueError(f'Unknown config key "{k}"')
 
-                val = self.__config_items__[k].from_config(config[k])
+                val = self.__config__[k].from_config(config[k])
                 setattr(self, k, val)
                 already_set.add(k)
 
         # instantiate any unset things via the defaults
-        for k in set(self.__config_items__).difference(already_set):
-            setattr(self, k, self.__config_items__[k].get_default())
+        for k in set(self.__config__).difference(already_set):
+            setattr(self, k, self.__config__[k].get_default())
 
     def get_config(self):
         '''
         Get the current config of an instance as dict.
         '''
         # to avoid circular import
-        from .items import ConfigurableClassItem
+        from .items import ConfigurableInstance
 
         config = {}
-        for k, item in self.__config_items__.items():
-            v = self.__config__[k]
-            if isinstance(item, ConfigurableClassItem):
+        for k, item in self.__config__.items():
+            v = getattr(self, k)
+            if isinstance(item, ConfigurableInstance):
                 config[k] = v.get_config()
                 # if the value is actually a subclass, we need include the name
                 if v.__class__ is not item.cls:
@@ -87,7 +91,7 @@ class Configurable:
         '''
         return {
             k: item.get_default_config()
-            for k, item in cls.__config_items__.items()
+            for k, item in cls.__config__.items()
         }
 
     @classmethod
@@ -125,5 +129,5 @@ class Configurable:
         return subclasses[name]
 
     def __repr__(self):
-        configs = ', '.join(f'{k}={v!r}' for k, v in self.__config__.items())
+        configs = ', '.join(f'{k}={getattr(self, k)!r}' for k in self.__config__.keys())
         return f'{self.__class__.__name__}({configs})'

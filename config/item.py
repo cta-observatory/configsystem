@@ -1,31 +1,40 @@
 from abc import ABCMeta, abstractmethod
+import weakref
 
 
-class ConfigItem(metaclass=ABCMeta):
+class Item(metaclass=ABCMeta):
     '''
     Base class for all configuration items.
 
     This is a descriptor for class members.
-    Each ConfigItem describes one configurable member variable
+    Each Item describes one configurable member variable
     of the instances.
     '''
     def __init__(self, help):
         self.help = help
 
-    def __get__(self, instance, owner=None):
-        if instance is None:
-            return self
-        return instance.__config__[self.name]
-
     def __set_name__(self, owner, name):
+        # avoid circular reference
+        self.configurable = weakref.ref(owner)
         self.name = name
 
     def __set__(self, instance, value):
-        instance.__config__[self.name] = value
+        value = self.validate(value)
+        instance.__dict__[self.name] = value
+
+    @abstractmethod
+    def validate(self, value):
+        '''Validate value, raises ValueError for invalid values'''
+        pass
 
     @abstractmethod
     def from_config(self, config):
         '''Create the value from its config representation'''
+        pass
+
+    @abstractmethod
+    def from_string(self, string):
+        '''Create the value from a string representation'''
         pass
 
     @abstractmethod

@@ -2,19 +2,17 @@ import pytest
 
 
 def test_class_definition():
-    from config import Configurable, ObjectItem
+    from config import Configurable, Int
 
     class Test(Configurable):
-        val = ObjectItem()
-
-    assert 'val' in Test.__config_items__
+        val = Int(help='')
 
 
 def test_instantiation():
-    from config import Configurable, ObjectItem
+    from config import Configurable, Int
 
     class Test(Configurable):
-        val = ObjectItem()
+        val = Int(help='')
 
     t = Test()
     assert t.val is None
@@ -28,10 +26,10 @@ def test_instantiation():
 
 
 def test_assignment():
-    from config import Configurable, ObjectItem
+    from config import Configurable, Int
 
     class Test(Configurable):
-        val = ObjectItem()
+        val = Int(help='')
 
     t = Test()
     assert t.val is None
@@ -40,10 +38,10 @@ def test_assignment():
 
 
 def test_config():
-    from config import Configurable, ObjectItem
+    from config import Configurable, Int
 
     class Test(Configurable):
-        val = ObjectItem(default=1)
+        val = Int(default=1, help='')
 
     t = Test()
     assert t.val == 1
@@ -57,10 +55,10 @@ def test_config():
 
 
 def test_get_config_simple():
-    from config import Configurable, ObjectItem
+    from config import Configurable, Int
 
     class Test(Configurable):
-        val = ObjectItem()
+        val = Int(help='')
 
     t = Test()
     assert t.get_config() == {'val': None}
@@ -70,14 +68,14 @@ def test_get_config_simple():
 
 
 def test_get_config_nested():
-    from config import Configurable, ObjectItem, ConfigurableClassItem
+    from config import Configurable, Int, ConfigurableInstance
 
     class Sub(Configurable):
-        val = ObjectItem()
+        val = Int(help='')
 
     class Main(Configurable):
-        val = ObjectItem()
-        sub = ConfigurableClassItem(Sub, default_config=dict(val=10))
+        val = Int(help='')
+        sub = ConfigurableInstance(Sub, default_config=dict(val=10), help='')
 
     m = Main()
     assert m.get_config() == {'val': None, 'sub': {'val': 10}}
@@ -87,30 +85,31 @@ def test_get_config_nested():
 
 
 def test_get_default_config():
-    from config import Configurable, ObjectItem, ConfigurableClassItem
+    from config import Configurable, Int, ConfigurableInstance
 
     class Foo(Configurable):
-        val = ObjectItem()
+        val = Int(help='')
 
     class Main(Configurable):
-        val = ObjectItem()
-        foo = ConfigurableClassItem(Foo, default_config=dict(val=10))
+        val = Int(help='')
+        foo = ConfigurableInstance(Foo, default_config=dict(val=10), help='')
 
     m = Main()
     assert m.get_config() == Main.get_default_config()
 
     # test with subclass
     class Foo(Configurable):
-        val1 = ObjectItem(1)
+        val1 = Int(1, help='')
 
     class Sub(Foo):
-        val2 = ObjectItem(2)
+        val2 = Int(2, help='')
 
     class Main(Configurable):
-        val = ObjectItem()
-        foo = ConfigurableClassItem(
+        val = Int(help='')
+        foo = ConfigurableInstance(
             Foo,
             default_config={'cls': 'Sub', 'val1': 3, 'val2': 4},
+            help='',
         )
 
     m = Main()
