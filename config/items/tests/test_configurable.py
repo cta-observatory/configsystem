@@ -6,10 +6,10 @@ def test_simple():
     from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = Int(default=1, help='')
+        val = Int(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableInstance(cls=Foo, help='')
+        foo = ConfigurableInstance(cls=Foo)
 
     bar = Bar()
     assert isinstance(bar.foo, Foo)
@@ -19,14 +19,31 @@ def test_simple():
         bar.foo = 1
 
 
+
+def test_get_default():
+    from config import Configurable, ConfigurableInstance, Int
+
+    class Foo(Configurable):
+        val = Int()
+
+    item = ConfigurableInstance(Foo)
+    foo = item.get_default()
+    assert foo.val is None
+
+    item = ConfigurableInstance(Foo, default_config=dict(val=10))
+    foo = item.get_default()
+    assert foo.val == 10
+
+
+
 def test_default_config():
     from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = Int(default=1, help='')
+        val = Int(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableInstance(cls=Foo, default_config={'val': 2}, help='')
+        foo = ConfigurableInstance(cls=Foo, default_config={'val': 2})
 
     bar = Bar()
     assert isinstance(bar.foo, Foo)
@@ -37,13 +54,13 @@ def test_default_nested():
     from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = Int(default=1, help='')
+        val = Int(default=1)
 
     class Bar(Configurable):
-        foo = ConfigurableInstance(cls=Foo, default_config={'val': 2}, help='')
+        foo = ConfigurableInstance(cls=Foo, default_config={'val': 2})
 
     class Baz(Configurable):
-        bar = ConfigurableInstance(cls=Bar, default_config={'foo': {'val': 3}}, help='')
+        bar = ConfigurableInstance(cls=Bar, default_config={'foo': {'val': 3}})
 
     baz = Baz()
     assert isinstance(baz.bar.foo, Foo)
@@ -54,11 +71,11 @@ def test_config_nested():
     from config import Configurable, Int, ConfigurableInstance
 
     class Foo(Configurable):
-        val = Int(default=1, help='')
+        val = Int(default=1)
 
     class Bar(Configurable):
-        val = Int(default=2, help='')
-        foo = ConfigurableInstance(Foo, default_config={'val': 3}, help='')
+        val = Int(default=2)
+        foo = ConfigurableInstance(Foo, default_config={'val': 3})
 
     # test with empty config
     b = Bar(config={})
@@ -82,17 +99,17 @@ def test_deeply_nested():
     from config import Configurable, Int, ConfigurableInstance
 
     class Foo(Configurable):
-        val = Int(default=1, help='')
+        val = Int(default=1)
 
     class Bar(Configurable):
-        val = Int(default=2, help='')
-        foo = ConfigurableInstance(Foo, help='')
+        val = Int(default=2)
+        foo = ConfigurableInstance(Foo)
 
     class Baz(Configurable):
-        foo = ConfigurableInstance(Foo, default_config={'val': 5}, help='')
-        bar1 = ConfigurableInstance(Bar, help='')
+        foo = ConfigurableInstance(Foo, default_config={'val': 5})
+        bar1 = ConfigurableInstance(Bar)
         bar2 = ConfigurableInstance(
-            Bar, default_config={'val': 3, 'foo': {'val': 4}}, help=''
+            Bar, default_config={'val': 3, 'foo': {'val': 4}}
         )
 
     b = Baz()
@@ -117,11 +134,11 @@ def test_two_of_same_class():
     from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = Int(default=1, help='')
+        val = Int(default=1)
 
     class Bar(Configurable):
-        foo1 = ConfigurableInstance(cls=Foo, default_config={'val': 2}, help='')
-        foo2 = ConfigurableInstance(cls=Foo, default_config={'val': 3}, help='')
+        foo1 = ConfigurableInstance(cls=Foo, default_config={'val': 2})
+        foo2 = ConfigurableInstance(cls=Foo, default_config={'val': 3})
 
     bar = Bar()
     assert bar.foo1.val == 2
@@ -136,13 +153,13 @@ def test_subclasses():
     from config import Configurable, ConfigurableInstance, Int
 
     class Foo(Configurable):
-        val = Int(default=1, help='')
+        val = Int(default=1)
 
     class SubFoo(Foo):
-        pass
+        val2 = Int(default=2)
 
     class Bar(Configurable):
-        foo = ConfigurableInstance(cls=Foo, help='')
+        foo = ConfigurableInstance(cls=Foo)
 
     bar = Bar(config={'foo': {'cls': 'SubFoo', 'val': 2}})
     assert isinstance(bar.foo, SubFoo)
@@ -150,3 +167,11 @@ def test_subclasses():
 
     with pytest.raises(ConfigError):
         Bar(config={'foo': {'cls': 'blabla', 'val': 2}})
+
+
+    bar = Bar(foo=SubFoo())
+    assert bar.foo.val == 1
+    assert bar.foo.val2 == 2
+
+    with pytest.raises(ConfigError):
+        bar.foo = 1

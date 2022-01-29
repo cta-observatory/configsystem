@@ -1,5 +1,5 @@
 class ConfigError(ValueError):
-    def __init__(self, configurable, item, value, msg):
+    def __init__(self, item, value, msg):
         super().__init__(
-            f'Config error for item {item.name}={item} of {configurable!r}: {msg}, got {value!r}'
+            f'Item {item!r}: {msg}, got {value!r}'
         )

@@ -5,14 +5,14 @@ def test_class_definition():
     from config import Configurable, Int
 
     class Test(Configurable):
-        val = Int(help='')
+        val = Int()
 
 
 def test_instantiation():
     from config import Configurable, Int
 
     class Test(Configurable):
-        val = Int(help='')
+        val = Int()
 
     t = Test()
     assert t.val is None
@@ -29,7 +29,7 @@ def test_assignment():
     from config import Configurable, Int
 
     class Test(Configurable):
-        val = Int(help='')
+        val = Int()
 
     t = Test()
     assert t.val is None
@@ -41,7 +41,7 @@ def test_config():
     from config import Configurable, Int
 
     class Test(Configurable):
-        val = Int(default=1, help='')
+        val = Int(default=1)
 
     t = Test()
     assert t.val == 1
@@ -58,10 +58,10 @@ def test_get_config_simple():
     from config import Configurable, Int
 
     class Test(Configurable):
-        val = Int(help='')
+        val = Int()
 
     t = Test()
-    assert t.get_config() == {'val': None}
+    assert t.get_config() == { 'val': None}
 
     t.val = 10
     assert t.get_config() == {'val': 10}
@@ -71,11 +71,11 @@ def test_get_config_nested():
     from config import Configurable, Int, ConfigurableInstance
 
     class Sub(Configurable):
-        val = Int(help='')
+        val = Int()
 
     class Main(Configurable):
-        val = Int(help='')
-        sub = ConfigurableInstance(Sub, default_config=dict(val=10), help='')
+        val = Int()
+        sub = ConfigurableInstance(Sub, default_config=dict(val=10))
 
     m = Main()
     assert m.get_config() == {'val': None, 'sub': {'val': 10}}
@@ -88,28 +88,27 @@ def test_get_default_config():
     from config import Configurable, Int, ConfigurableInstance
 
     class Foo(Configurable):
-        val = Int(help='')
+        val = Int()
 
     class Main(Configurable):
-        val = Int(help='')
-        foo = ConfigurableInstance(Foo, default_config=dict(val=10), help='')
+        val = Int()
+        foo = ConfigurableInstance(Foo, default_config=dict(val=10))
 
     m = Main()
     assert m.get_config() == Main.get_default_config()
 
     # test with subclass
     class Foo(Configurable):
-        val1 = Int(1, help='')
+        val1 = Int(1)
 
     class Sub(Foo):
-        val2 = Int(2, help='')
+        val2 = Int(2)
 
     class Main(Configurable):
-        val = Int(help='')
+        val = Int()
         foo = ConfigurableInstance(
             Foo,
             default_config={'cls': 'Sub', 'val1': 3, 'val2': 4},
-            help='',
         )
 
     m = Main()
@@ -132,7 +131,7 @@ def test_get_nonabstract_subclasses():
             pass
 
     class Baz(Bar, metaclass=ABCMeta):
-        def test():
+        def test(self):
             pass
 
     class Quuz(Foo):

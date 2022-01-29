@@ -6,10 +6,10 @@ def test_quantity_simple():
     u = pytest.importorskip('astropy.units')
 
     from config import Configurable
-    from config.astropy import QuantityItem
+    from config.items.astropy import QuantityItem
 
     class Test(Configurable):
-        q = QuantityItem(help='')
+        q = QuantityItem()
 
     t = Test()
     t.q = 5
@@ -32,10 +32,10 @@ def test_quantity_unit():
     u = pytest.importorskip('astropy.units')
 
     from config import Configurable
-    from config.astropy import QuantityItem
+    from config.items.astropy import QuantityItem
 
     class Test(Configurable):
-        q = QuantityItem(unit=u.m, help='')
+        q = QuantityItem(unit=u.m)
 
     t = Test()
     with pytest.raises(ConfigError):
@@ -46,10 +46,10 @@ def test_quantity_allow_none():
     u = pytest.importorskip('astropy.units')
 
     from config import Configurable
-    from config.astropy import QuantityItem
+    from config.items.astropy import QuantityItem
 
     class Test(Configurable):
-        q = QuantityItem(default=1 * u.m, unit=u.m, allow_none=False, help='')
+        q = QuantityItem(default=1 * u.m, unit=u.m, allow_none=False)
 
     t = Test()
     with pytest.raises(ConfigError):

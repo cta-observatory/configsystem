@@ -1,12 +1,16 @@
 from .configurable import Configurable
 from .item import Item
-from .items import Object, ConfigurableInstance, Int
+from .exceptions import ConfigError
+from .items import Object, ConfigurableInstance, Int, Float, Path
 
 
 __all__ = [
     'Configurable',
     'Item',
+    'ConfigError',
     'Object',
     'ConfigurableInstance',
     'Int',
+    'Float',
+    'Path',
 ]

@@ -7,14 +7,16 @@ except ImportError:
 
 from collections.abc import Mapping
 
-from .items import Object, ConfigError
+from .basic import Object
+from ..exceptions import ConfigError
 
 
 class QuantityItem(Object):
 
     def __init__(self, unit=None, **kwargs):
-        super().__init__(**kwargs)
         self.unit = unit
+        # validate needs unit to be already set
+        super().__init__(**kwargs)
 
     def validate(self, value):
         value = super().validate(value)
@@ -24,26 +26,27 @@ class QuantityItem(Object):
         try:
             value = u.Quantity(value, copy=False)
         except ValueError:
-            raise ConfigError(self.configurable(), self, value, f"must be a valid input to Quantity")
+            raise ConfigError(self, value, f"must be a valid input to Quantity")
 
         # verify unit if one is required
         if self.unit is not None:
             try:
-                value = value.to(self.unit)
+                value = value.to(self.unit, copy=False)
             except ValueError:
-                raise ConfigError(self.configurable(), self, value, f"must be convertible to {self.unit}")
+                raise ConfigError(self, value, f"must be convertible to {self.unit}")
 
         return value
 
     def from_config(self, config_value):
-        if isinstance(config_value, u.Quantity):
-            return config_value
-        elif isinstance(config_value, Mapping):
-            return u.Quantity(**config_value)
-        else:
-            raise TypeError(
-                'Config value for QuantityItem must be a Quantity or dict'
-                f', got {config_value}'
+        try:
+            if isinstance(config_value, Mapping):
+                config_value = u.Quantity(**config_value, copy=False)
+            return self.validate(config_value)
+        except Exception:
+            raise ConfigError(
+                self,
+                config_value,
+                'Config value for QuantityItem must be a Quantity, dict or valid input to u.Quantity'
             )
 
     def from_string(self, string):

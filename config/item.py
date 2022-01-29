@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 import weakref
 
+from .exceptions import ConfigError
+
 
 class Item(metaclass=ABCMeta):
     '''
@@ -10,8 +12,11 @@ class Item(metaclass=ABCMeta):
     Each Item describes one configurable member variable
     of the instances.
     '''
-    def __init__(self, help):
+    def __init__(self, help='', allow_none=True):
         self.help = help
+        self.allow_none = allow_none
+        self.configurable = None
+        self.name = None
 
     def __set_name__(self, owner, name):
         # avoid circular reference
@@ -22,10 +27,11 @@ class Item(metaclass=ABCMeta):
         value = self.validate(value)
         instance.__dict__[self.name] = value
 
-    @abstractmethod
     def validate(self, value):
         '''Validate value, raises ValueError for invalid values'''
-        pass
+        if value is None and self.allow_none is False:
+            raise ConfigError(self, value, 'must not be None')
+        return value
 
     @abstractmethod
     def from_config(self, config):
@@ -48,9 +54,9 @@ class Item(metaclass=ABCMeta):
         pass
 
     def __repr__(self):
-        return (
-            f'{self.__class__.__name__}('
-            f'name={self.name}'
-            f', default={self.get_default()}'
-            ')'
-        )
+        if self.configurable is None:
+            part1 = f'{self.__class__.__name__}'
+        else:
+            part1 = f'{self.configurable()}.{self.name}[{self.__class__.__name__}]'
+
+        return f'{part1}(default={self.get_default()}, allow_none={self.allow_none})'
