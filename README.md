@@ -1,9 +1,42 @@
-# Prototyping a config system for ctapipe and others
+# Prototyping a python configuration system
 
 
-## Requirements
+## Example
 
-1. Support deep hierarchies of configurations
+```python
+
+from config import Configurable, Int, Float, String, ConfigurableInstance, Path, Lookup
+
+
+class Cleaning(Configurable):
+    pass
+
+class BasicCleaning(Cleaning):
+    level = Lookup(Float(5.0), ("type", "id"), help="The cleaning level")
+
+class BetterCleaning(Cleaning):
+    level = Lookup(Float(5.0), ("type", "id"), help="The cleaning level")
+
+class ImageProcessor(Configurable):
+    cleaning = ConfigurableInstance(Cleaning, default_config=dict(cls=BasicCleaning))
+
+
+processor = ImageProcessor()
+
+print(processor.cleaning.level["LST", 1]) # => 5.0
+
+processor.cleaning.level = [("type", "LST", 3.0), ("type", "MST", 4.0)]
+
+print(processor.cleaning.level["LST", 1]) # => 3.0
+print(processor.cleaning.level["MST", 5]) # => 4.0
+```
+
+
+## Roadmap
+
+* [ ] A good name
+
+* [X] Support deep hierarchies of configurations
 
     This essentially means that we need to support configuration options
     that are themselves configurable and hand down the necessary config
@@ -11,9 +44,28 @@
 
     This makes the configuration a tree.
 
-2. Support lookup by arbitray keys for all config items.
+* [X] Parents must be able to override the default configuration of their
+    children. E.g. if `Child` has a configuration item `value` with default `5`,
+    A `Parent` with a `child` configuration item has to be able to say that
+    the `child.value` default is `10` instead.
 
-    The simple case is just one global value, but this lookup should work
+* [X] The config system must support the configuration of multiple instances
+    of the same class next to each other in the hierarchy (unlike traitlets.config)
+
+* [X] The system should raise errors for unknown configuration options,
+    e.g to prevent unexpected results from simple typing mistakes.
+
+* [X] The full config of an object must be accessible / exportable
+
+* [X] It must be possible to configure the type of a variable from a
+   list of possible classes or the subclasses.
+   E.g. there are several ``ImageExtractors``, so the class used for
+   ``CameraCalibrator.image_extractor`` must be configurable through
+   the config system.
+
+* [X] Support lookup by arbitray keys for all config items.
+
+    The simple case is just one global value, but the lookup works
     on hierachical properties, to support
     * A global default
     * defaults per telescope type / camera type ...
@@ -21,25 +73,21 @@
 
     Where the more fine-grained categories override the coarser values.
 
-    E.g.:
+* [ ] Basic set of configuration items with commonly used validators
+    * [X] `Int`
+    * [X] `Float`
+    * [X] `String`
+    * [X] `Path`
+    * ...
 
-    ```
-    cleaning_levels = [
-      ('default', 10),
-      ('telescope_name', 'LST', 5),
-      ('telescope_id', 42, 6),
-    ]
+* [ ] Implement container-like configuration items
+    * [ ] `List`
+    * [ ] `Set`
+    * [ ] `Dict`
 
-    lookup(cleaning_levels) -> 10
-    lookup(cleaning_levels, telescope_name='LST', telescope_id=1) -> 5
-    lookup(cleaning_levels, telescope_name='MST', telescope_id=10) -> 10
-    lookup(cleaning_levels, telescope_name='MST', telescope_id=42) -> 6
-    ```
+* [ ] Build CLIs for the configurable options automatically
 
-3. Build CLIs for the configurable options automatically
-
-
-4. Support loading configuration from files
+* [ ] Support loading configuration from files
 
     Most probably at least one (or all) of these should be supported.
     In order of preference:
@@ -47,19 +95,12 @@
     * yaml
     * json
 
-5. The config system must support the configuration of multiple instances
-of the same class next to each other in the hierarchy (unlike traitlets.config)
+    In a sense, this is already supported, since all loaders of these
+    formats give you a `dict` and that can be passed as config.
 
-6. The system should raise errors for unknown configuration options,
-e.g to prevent unexpected results from simple typing mistakes.
-
-7. It must be possible to configure the type of a variable from a
-   list of possible classes or the subclasses.
-   E.g. there are several ``ImageExtractors``, so the class used for
-   ``CameraCalibrator.image_extractor`` must be configurable through
-   the config system.
-
-8. The full config of an object must be accessible / exportable
+    However, for the CLI use case, we want to be able to pass the config file
+    as CLI option and in general we probably also need clever ways to merge
+    multiple config files with support for precedence.
 
 ## Design decisions
 
