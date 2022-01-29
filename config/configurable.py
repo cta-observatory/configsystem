@@ -5,6 +5,9 @@ from .item import Item
 
 
 class Configurable:
+    __config__ = {}
+
+
     def __init_subclass__(cls):
         '''
         Called when a new subclass of Configurable is created
@@ -12,13 +15,13 @@ class Configurable:
         Sets up the ``__config__`` dict as a class member
         and inherits the config items from the base classes.
         '''
+        # make sure each class gets it's own config dict
         cls.__config__ = {}
-
 
         # inherit config items
         for b in cls.__bases__:
             if hasattr(b, '__config__'):
-                for k, v in b.__config__.items():
+                for k, v in getattr(b, '__config__').items():
                     cls.__config__[k] = v
 
         # but local ones override those of the base classes
