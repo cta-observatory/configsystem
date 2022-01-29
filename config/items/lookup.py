@@ -108,7 +108,7 @@ class Lookup(Item):
                 **config
             )
         except:
-            raise ConfigError(self, config, 'is an invalid config')
+            raise ConfigError(self, config, 'Invalid config for lookup')
 
 
     def get_default(self):
