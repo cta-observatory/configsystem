@@ -20,9 +20,9 @@ class Configurable:
 
         # inherit config items
         for b in cls.__bases__:
-            if hasattr(b, '__config__'):
-                for k, v in getattr(b, '__config__').items():
-                    cls.__config__[k] = v
+            config = getattr(b, '__config__', {})
+            for k, v in config.items():
+                cls.__config__[k] = v
 
         # but local ones override those of the base classes
         for k, v in cls.__dict__.items():
