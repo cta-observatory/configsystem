@@ -15,21 +15,28 @@ __all__ = ['LookupDatabase', 'Lookup']
 
 class LookupDatabase:
 
-    def __init__(self, item, hierarchy, default=None, configuration=None):
-        self.hierarchy = tuple(hierarchy)
+    def __init__(self, item, hierarchy, default=None, lookups=None):
+        self.item = item
+
+        if not isinstance(item, Item):
+            raise TypeError('item must be an Item')
+
+        if isinstance(hierarchy, str):
+            self.hierarchy = (hierarchy, )
+        else:
+            self.hierarchy = tuple(hierarchy)
+
         self._indexed_hierarchy = list(enumerate(hierarchy))[::-1]
         self._expected = '(' + ', '.join(f'<{key} value>' for key in self.hierarchy) + ')'
-
-        self.item = item
         # allow overriding the default of the item
         self.default = default if default is not None else self.item.get_default()
 
-        self.configuration = []
+        self.lookups = []
 
-        if configuration is None:
+        if lookups is None:
             return
 
-        for lookup_config in configuration:
+        for lookup_config in lookups:
             lookup_config = tuple(lookup_config)
 
             if len(lookup_config) != 3:
@@ -41,7 +48,7 @@ class LookupDatabase:
 
 
             value = item.validate(value)
-            self.configuration.append((key, key_value, value))
+            self.lookups.append((key, key_value, value))
 
     @cache
     def __getitem__(self, lookup):
@@ -54,7 +61,7 @@ class LookupDatabase:
 
         for index, key in self._indexed_hierarchy:
 
-            for (lookup_key, key_value, value) in self.configuration:
+            for (lookup_key, key_value, value) in self.lookups:
                 if key != lookup_key:
                     continue
 
@@ -68,11 +75,17 @@ class LookupDatabase:
 
 
 class Lookup(Item):
-    def __init__(self, item, hierarchy, default_config=None, **kwargs):
+    def __init__(self, item, hierarchy, default_lookups=None, **kwargs):
         super().__init__(**kwargs)
         self.item = item
-        self.hierarchy = hierarchy
-        self.default_config = default_config
+
+        if isinstance(hierarchy, str):
+            self.hierarchy = (hierarchy, )
+        else:
+            self.hierarchy = tuple(hierarchy)
+
+        self.default_lookups = default_lookups
+        self.validate(self.get_default())
 
 
     def from_config(self, config):
@@ -87,14 +100,12 @@ class Lookup(Item):
 
 
     def get_default(self):
-        if self.default_config is None:
-            return LookupDatabase(self.item, self.hierarchy)
-        return self.from_config(self.default_config)
+        return LookupDatabase(self.item, self.hierarchy, lookups=self.default_lookups)
 
     def get_default_config(self):
-        if self.default_config is None:
+        if self.default_lookups is None:
             return {}
-        return self.default_config
+        return dict(lookups=self.default_lookups)
 
     def validate(self, value):
         if not isinstance(value, LookupDatabase):

@@ -8,7 +8,7 @@ def test_single_key():
     lookup = LookupDatabase(
         item=Int(1),
         hierarchy=("type", ),
-        configuration=[
+        lookups=[
             ("type", "LST", 2),
             ("type", "MST", 3),
         ],
@@ -28,7 +28,7 @@ def test_two_keys():
     lookup = LookupDatabase(
         item=Int(1),
         hierarchy=("type", "id"),
-        configuration=[
+        lookups=[
             ("type", "LST", 2),
             ("type", "MST", 3),
             ("id", 5, 4),
@@ -58,7 +58,7 @@ def test_lookup_invalid():
         LookupDatabase(
             item=Int(1),
             hierarchy=("type", "id"),
-            configuration=[
+            lookups=[
                 ("type", "LST", 2),
                 ("type", "MST", 3),
                 ("invalid", 5, 4),
@@ -70,7 +70,7 @@ def test_lookup_invalid():
         LookupDatabase(
             item=Int(1),
             hierarchy=("type", "id"),
-            configuration=[
+            lookups=[
                 ("type", "MST", 3),
                 ("type", 2),
             ],
@@ -81,7 +81,7 @@ def test_lookup_invalid():
         LookupDatabase(
             item=Int(1),
             hierarchy=("type", "id"),
-            configuration=[
+            lookups=[
                 ("type", "MST", 3),
                 ("type", "LST", "foo"),
             ],
@@ -91,7 +91,7 @@ def test_lookup_invalid():
     lookup = LookupDatabase(
         item=Int(1),
         hierarchy=("type", "id"),
-        configuration=[
+        lookups=[
             ("type", "MST", 3),
             ("type", "LST", 2),
             ("id", 1, 2),
@@ -138,7 +138,7 @@ def test_item():
     cleaning_levels = LookupDatabase(
         item=Float(10.0),
         hierarchy=('type', 'id'),
-        configuration=[
+        lookups=[
             ('type', 'LST', 5.0),
             ('type', 'MST', 15.0),
             ('id', 5, 20.0),
