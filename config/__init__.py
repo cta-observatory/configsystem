@@ -10,6 +10,9 @@ from .items import (
 )
 
 
+__version__ = '0.1.0a0'
+
+
 __all__ = [
     'Configurable',
     'Item',
