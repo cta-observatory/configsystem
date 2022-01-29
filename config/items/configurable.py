@@ -7,17 +7,21 @@ class ConfigurableInstance(Item):
     '''
     A config item that is itself configurable
     '''
-    def __init__(self, cls, default_config=None, **kwargs):
+    def __init__(self, cls, default_config=None, allow_subclasses=True, **kwargs):
         if not issubclass(cls, Configurable):
             raise TypeError('cls must be a subclass of ``Configurable``')
 
         super().__init__(**kwargs)
         self.cls = cls
         self.default_config = {} if default_config is None else default_config
+        self.allow_subclasses = allow_subclasses
 
     def validate(self, value):
         if not isinstance(value, self.cls):
             raise ConfigError(self, value, f"must be an instance of {self.cls}")
+        
+        if self.allow_subclasses is False and type(value) is not self.cls:
+            raise ConfigError(self, value, "must not be a subclass instance")
         return value
 
     def from_config(self, config):
