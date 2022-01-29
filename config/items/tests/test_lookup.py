@@ -114,7 +114,7 @@ def test_defaults():
     assert lookup[1, 2] is None
 
     lookup = LookupDatabase(Int(5), ('foo', 'bar'))
-    assert lookup[1, 2] is 5
+    assert lookup[1, 2] == 5
 
 
 def test_item():
@@ -174,3 +174,87 @@ def test_invalid():
     wrong_hierarchy = LookupDatabase(item=Float(5.0), hierarchy=('foo', 'id'))
     with pytest.raises(ConfigError):
         cleaning.level = wrong_hierarchy
+
+
+
+def test_configurable_instance_lookup():
+    from config import Configurable, ConfigurableInstance, Float, Lookup
+
+
+    class Cleaning(Configurable):
+        pass
+
+
+    class TailCutsCleaning(Cleaning):
+        level = Lookup(Float(10.0), hierarchy=('type', 'id'))
+
+    class TimeCleaning(Cleaning):
+        level = Lookup(Float(10.0), hierarchy=('type', 'id'))
+        time = Lookup(Float(2.0), hierarchy=('type', 'id'))
+
+
+    # a class where we have a lookup for a ConfigurableInstance,
+    # that itself contains lookups
+    class ImageProcessor(Configurable):
+        cleaning = Lookup(
+            ConfigurableInstance(Cleaning, default_config=dict(cls=TailCutsCleaning)),
+            hierarchy='type'
+        )
+
+    processor = ImageProcessor()
+    assert type(processor.cleaning['LST']) is TailCutsCleaning
+    assert type(processor.cleaning['MST']) is TailCutsCleaning
+
+
+    processor = ImageProcessor(cleaning=[("type", "LST", TimeCleaning())])
+    assert type(processor.cleaning['LST']) is TimeCleaning
+    assert type(processor.cleaning['MST']) is TailCutsCleaning
+
+
+def test_configurable_instance_lookup_config():
+    from config import Configurable, ConfigurableInstance, Float, Lookup
+
+
+    class Cleaning(Configurable):
+        pass
+
+
+    class TailCutsCleaning(Cleaning):
+        level = Lookup(Float(10.0), hierarchy=('type', 'id'))
+
+    class TimeCleaning(Cleaning):
+        level = Lookup(Float(10.0), hierarchy=('type', 'id'))
+        time = Lookup(Float(2.0), hierarchy=('type', 'id'))
+
+
+    # a class where we have a lookup for a ConfigurableInstance,
+    # that itself contains lookups
+    class ImageProcessor(Configurable):
+        cleaning = Lookup(
+            ConfigurableInstance(Cleaning, default_config=dict(cls=TailCutsCleaning)),
+            hierarchy='type'
+        )
+
+    config = {
+        "cleaning": {
+            "default": {
+                "cls": "TailCutsCleaning",
+                "level": 5.0,
+            },
+            "lookups": [
+                ("type", "LST", { "cls": "TimeCleaning", "time": { "default": 3.0, "lookups": [("id", 2, 4.0)], }}),
+                ("type", "SST", { "cls": "TailCutsCleaning", "level": 7.5})
+            ]
+        }
+    }
+
+    processor = ImageProcessor(config=config)
+    assert type(processor.cleaning['LST']) is TimeCleaning
+    assert type(processor.cleaning['MST']) is TailCutsCleaning
+    assert type(processor.cleaning['SST']) is TailCutsCleaning
+
+    assert processor.cleaning['MST'].level['MST', 1] == 5.0
+    assert processor.cleaning['LST'].level['LST', 1] == 10.0
+    assert processor.cleaning['LST'].time['LST', 1] == 3.0
+    assert processor.cleaning['LST'].time['LST', 2] == 4.0
+    assert processor.cleaning['SST'].level['SST', 40] == 7.5

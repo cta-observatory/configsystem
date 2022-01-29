@@ -8,6 +8,7 @@ except ImportError:
 
 from ..item import Item
 from ..exceptions import ConfigError
+from .configurable import ConfigurableInstance
 
 
 __all__ = ['LookupDatabase', 'Lookup']
@@ -28,8 +29,13 @@ class LookupDatabase:
 
         self._indexed_hierarchy = list(enumerate(hierarchy))[::-1]
         self._expected = '(' + ', '.join(f'<{key} value>' for key in self.hierarchy) + ')'
-        # allow overriding the default of the item
-        self.default = default if default is not None else self.item.get_default()
+
+        if isinstance(self.item, ConfigurableInstance) and isinstance(default, dict):
+            self.default = self.item.from_config(default)
+        elif default is None:
+            self.default = self.item.get_default()
+        else:
+            self.default = self.item.validate(default)
 
         self.lookups = []
 
@@ -47,7 +53,10 @@ class LookupDatabase:
                 raise ValueError(f'Key {key} not in hierarchy: {self.hierarchy}')
 
 
-            value = item.validate(value)
+            if isinstance(self.item, ConfigurableInstance) and isinstance(value, dict):
+                value = self.item.from_config(value)
+
+            value = self.item.validate(value)
             self.lookups.append((key, key_value, value))
 
     @cache
@@ -89,6 +98,9 @@ class Lookup(Item):
 
 
     def from_config(self, config):
+        if not isinstance(config, dict):
+            config = {"default": config}
+
         try:
             return LookupDatabase(
                 item=self.item,
@@ -109,8 +121,11 @@ class Lookup(Item):
 
     def validate(self, value):
         if not isinstance(value, LookupDatabase):
-            # see if it's a single value matching our item
+            # assume a list is a list of lookups
+            if isinstance(value, list):
+                return LookupDatabase(item=self.item, hierarchy=self.hierarchy, lookups=value)
 
+            # see if it's a single value matching our item
             try:
                 value = self.item.validate(value)
             except ConfigError:
