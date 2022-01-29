@@ -10,7 +10,10 @@ from ..item import Item
 from ..exceptions import ConfigError
 
 
-class HierarchicalLookup:
+__all__ = ['LookupDatabase', 'Lookup']
+
+
+class LookupDatabase:
 
     def __init__(self, item, hierarchy, default=None, configuration=None):
         self.hierarchy = tuple(hierarchy)
@@ -74,7 +77,7 @@ class Lookup(Item):
 
     def from_config(self, config):
         try:
-            return HierarchicalLookup(
+            return LookupDatabase(
                 item=self.item,
                 hierarchy=self.hierarchy,
                 **config
@@ -85,7 +88,7 @@ class Lookup(Item):
 
     def get_default(self):
         if self.default_config is None:
-            return HierarchicalLookup(self.item, self.hierarchy)
+            return LookupDatabase(self.item, self.hierarchy)
         return self.from_config(self.default_config)
 
     def get_default_config(self):
@@ -94,7 +97,7 @@ class Lookup(Item):
         return self.default_config
 
     def validate(self, value):
-        if not isinstance(value, HierarchicalLookup):
+        if not isinstance(value, LookupDatabase):
             # see if it's a single value matching our item
 
             try:
@@ -102,7 +105,7 @@ class Lookup(Item):
             except ConfigError:
                 raise ConfigError(self, value, f'Single value must be valid for {self.item}')
 
-            return HierarchicalLookup(item=self.item, hierarchy=self.hierarchy, default=value)
+            return LookupDatabase(item=self.item, hierarchy=self.hierarchy, default=value)
 
         if value.hierarchy != self.hierarchy:
             raise ConfigError(

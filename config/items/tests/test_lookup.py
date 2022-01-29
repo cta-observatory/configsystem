@@ -3,9 +3,9 @@ import pytest
 
 def test_single_key():
     from config import Int
-    from config.items.lookup import HierarchicalLookup
+    from config.items.lookup import LookupDatabase
 
-    lookup = HierarchicalLookup(
+    lookup = LookupDatabase(
         item=Int(1),
         hierarchy=("type", ),
         configuration=[
@@ -22,10 +22,10 @@ def test_single_key():
 
 
 def test_two_keys():
-    from config.items.lookup import HierarchicalLookup
+    from config.items.lookup import LookupDatabase
     from config import Int
 
-    lookup = HierarchicalLookup(
+    lookup = LookupDatabase(
         item=Int(1),
         hierarchy=("type", "id"),
         configuration=[
@@ -50,12 +50,12 @@ def test_two_keys():
 
 
 def test_lookup_invalid():
-    from config.items.lookup import HierarchicalLookup
+    from config.items.lookup import LookupDatabase
     from config import Int
 
     # invalid key in configuration
     with pytest.raises(ValueError):
-        HierarchicalLookup(
+        LookupDatabase(
             item=Int(1),
             hierarchy=("type", "id"),
             configuration=[
@@ -67,7 +67,7 @@ def test_lookup_invalid():
 
     # invalid key in configuration
     with pytest.raises(ValueError):
-        HierarchicalLookup(
+        LookupDatabase(
             item=Int(1),
             hierarchy=("type", "id"),
             configuration=[
@@ -78,7 +78,7 @@ def test_lookup_invalid():
 
     # invalid value in configuration
     with pytest.raises(ValueError):
-        HierarchicalLookup(
+        LookupDatabase(
             item=Int(1),
             hierarchy=("type", "id"),
             configuration=[
@@ -88,7 +88,7 @@ def test_lookup_invalid():
         )
 
 
-    lookup = HierarchicalLookup(
+    lookup = LookupDatabase(
         item=Int(1),
         hierarchy=("type", "id"),
         configuration=[
@@ -107,35 +107,35 @@ def test_lookup_invalid():
 
 
 def test_defaults():
-    from config.items.lookup import HierarchicalLookup
+    from config.items.lookup import LookupDatabase
     from config import Int
 
-    lookup = HierarchicalLookup(Int(), ('foo', 'bar'))
+    lookup = LookupDatabase(Int(), ('foo', 'bar'))
     assert lookup[1, 2] is None
 
-    lookup = HierarchicalLookup(Int(5), ('foo', 'bar'))
+    lookup = LookupDatabase(Int(5), ('foo', 'bar'))
     assert lookup[1, 2] is 5
 
 
 def test_item():
     from config import Configurable, Float
-    from config.items.lookup import Lookup, HierarchicalLookup
+    from config.items.lookup import Lookup, LookupDatabase
 
 
     class Cleaning(Configurable):
         level = Lookup(Float(5.0), hierarchy=('type', 'id'))
 
     cleaning = Cleaning()
-    assert isinstance(cleaning.level, HierarchicalLookup)
+    assert isinstance(cleaning.level, LookupDatabase)
     assert cleaning.level['LST', 1] == 5.0
 
     # override default with a single value
     cleaning = Cleaning(level=10.0)
-    assert isinstance(cleaning.level, HierarchicalLookup)
+    assert isinstance(cleaning.level, LookupDatabase)
     assert cleaning.level['LST', 1] == 10.0
 
     # give a custom HierarchicalLookup
-    cleaning_levels = HierarchicalLookup(
+    cleaning_levels = LookupDatabase(
         item=Float(10.0),
         hierarchy=('type', 'id'),
         configuration=[
@@ -145,7 +145,7 @@ def test_item():
         ]
     )
     cleaning = Cleaning(level=cleaning_levels)
-    assert isinstance(cleaning.level, HierarchicalLookup)
+    assert isinstance(cleaning.level, LookupDatabase)
     assert cleaning.level['LST', 1] == 5.0
     assert cleaning.level['MST', 2] == 15.0
     assert cleaning.level['LST', 5] == 20.0
@@ -155,7 +155,7 @@ def test_item():
 
 def test_invalid():
     from config import Configurable, Float, Int
-    from config.items.lookup import Lookup, HierarchicalLookup
+    from config.items.lookup import Lookup, LookupDatabase
     from config.exceptions import ConfigError
 
 
@@ -167,10 +167,10 @@ def test_invalid():
 
     cleaning = Cleaning()
 
-    wrong_item = HierarchicalLookup(item=Int(5), hierarchy=('type', 'id'))
+    wrong_item = LookupDatabase(item=Int(5), hierarchy=('type', 'id'))
     with pytest.raises(ConfigError):
         cleaning.level = wrong_item
 
-    wrong_hierarchy = HierarchicalLookup(item=Float(5.0), hierarchy=('foo', 'id'))
+    wrong_hierarchy = LookupDatabase(item=Float(5.0), hierarchy=('foo', 'id'))
     with pytest.raises(ConfigError):
         cleaning.level = wrong_hierarchy

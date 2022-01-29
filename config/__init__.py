@@ -6,7 +6,7 @@ from .items import (
     ConfigurableInstance,
     Int, Float, Path, String,
     Lookup,
-    HierarchicalLookup,
+    LookupDatabase,
 )
 
 
@@ -21,5 +21,5 @@ __all__ = [
     'Path',
     'String',
     'Lookup',
-    'HierarchicalLookup',
+    'LookupDatabase',
 ]

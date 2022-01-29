@@ -1,7 +1,7 @@
 from .configurable import ConfigurableInstance
 from .basic import Object, Int, Float, String
 from .path import Path
-from .lookup import Lookup, HierarchicalLookup
+from .lookup import Lookup, LookupDatabase
 
 
 __all__ = [
@@ -12,5 +12,5 @@ __all__ = [
     'Path',
     'String',
     'Lookup',
-    'HierarchicalLookup',
+    'LookupDatabase',
 ]
