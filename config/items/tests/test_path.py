@@ -1,5 +1,6 @@
 import pathlib
 import pytest
+import os
 from config.exceptions import ConfigError
 
 
@@ -66,3 +67,12 @@ def test_path_configurable():
 
     with pytest.raises(ConfigError):
         foo = Foo()
+
+
+def test_path_resolution():
+    '''Test that paths are correctly resolved'''
+    from config import Path
+    path = Path()
+
+    expected = pathlib.Path(os.environ['HOME']) / 'bar'
+    assert path.validate('~/foo/../bar') == expected

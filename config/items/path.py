@@ -4,13 +4,27 @@ from ..exceptions import ConfigError
 
 
 class Path(Item):
+    '''
+    A `~pathlib.Path` item, that can optionally validate the given path.
+
+    Attributes
+    ----------
+    exists: bool or None
+        if True, path must exist, if False, path must not exist,
+        if None, no check is performed.
+    file_okay: bool
+        If False and path exists, the path must not be a file
+    dir_okay: bool
+        If False and path exists, the path must not be a directory
+    '''
 
     def __init__(self, default=None, exists=None, file_okay=True, dir_okay=True, **kwargs):
+        super().__init__(**kwargs)
+
         self.exists = exists
         self.file_okay = file_okay
         self.dir_okay = dir_okay
         self.default = default
-        super().__init__(**kwargs)
 
     def validate(self, value):
         value = super().validate(value)
@@ -18,7 +32,7 @@ class Path(Item):
             return None
 
         try:
-            value = pathlib.Path(value).absolute().expanduser()
+            value = pathlib.Path(value).expanduser().resolve().absolute()
         except ValueError:
             raise ConfigError(self, value, "must be a valid input for pathlib.Path")
 
