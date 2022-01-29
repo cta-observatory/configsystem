@@ -39,23 +39,25 @@ class Configurable:
         All config items not specified in config or kwargs are instantiated
         from their defaults.
         '''
-        # first set all attributes handed in via kwargs
+        # keep track of which config items we already set
+        already_set = set()
+
+        # first set / validate all attributes handed in via kwargs
         for k, v in kwargs.items():
             if k in self.__config__:
                 setattr(self, k, v)
+                already_set.add(k)
             else:
                 raise TypeError(
                     f'__init__ got an unexpected keyword argument {k}'
                 )
 
-        already_set = set(kwargs)
-
-        # now the remaining stuff via the config
+        # now the config
         if config is not None:
             if not isinstance(config, Mapping):
                 raise TypeError(f"config must be a mapping, got {config}")
 
-            for k in set(config.keys()).difference(already_set):
+            for k in set(config).difference(already_set):
                 if k not in self.__config__:
                     raise ValueError(f'Unknown config key "{k}"')
 
@@ -63,7 +65,7 @@ class Configurable:
                 setattr(self, k, val)
                 already_set.add(k)
 
-        # instantiate any unset things via the defaults
+        # set all remaining to their defaults
         for k in set(self.__config__).difference(already_set):
             setattr(self, k, self.__config__[k].get_default())
 
