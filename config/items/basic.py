@@ -3,10 +3,12 @@ from copy import deepcopy
 from ..item import Item
 from ..exceptions import ConfigError
 
+
 class Object(Item):
     '''
     A config item consisting of a single python object.
-    No nested configuration supported
+
+    No nested configuration supported.
     '''
     type = object
 
