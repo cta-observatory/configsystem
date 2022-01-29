@@ -26,7 +26,7 @@ class QuantityItem(Object):
         try:
             value = u.Quantity(value, copy=False)
         except ValueError:
-            raise ConfigError(self, value, f"must be a valid input to Quantity")
+            raise ConfigError(self, value, "must be a valid input to Quantity")
 
         # verify unit if one is required
         if self.unit is not None:

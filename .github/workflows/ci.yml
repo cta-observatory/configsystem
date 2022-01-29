@@ -25,7 +25,10 @@ jobs:
         run: |
           python -VV
           python -m site
-          python -m pip install '.[all]'
+          python -m pip install '.[all]' pyflakes
+
+      - name: 'Run pyflakes'
+        run: pyflakes config
 
       - name: "Run tests"
         run: |

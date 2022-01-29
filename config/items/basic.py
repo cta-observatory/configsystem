@@ -1,9 +1,7 @@
 from copy import deepcopy
-from operator import index
 
 from ..item import Item
 from ..exceptions import ConfigError
-from abc import abstractmethod
 
 class Object(Item):
     '''
