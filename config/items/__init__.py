@@ -1,5 +1,5 @@
 from .configurable import ConfigurableInstance
-from .basic import Object, Int, Float
+from .basic import Object, Int, Float, String
 from .path import Path
 
 
@@ -9,4 +9,5 @@ __all__ = [
     'Int',
     'Float',
     'Path',
+    'String',
 ]

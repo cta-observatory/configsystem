@@ -49,3 +49,7 @@ class Int(Object):
 
 class Float(Object):
     type = float
+
+
+class String(Object):
+    type = str

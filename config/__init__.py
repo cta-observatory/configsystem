@@ -1,7 +1,7 @@
 from .configurable import Configurable
 from .item import Item
 from .exceptions import ConfigError
-from .items import Object, ConfigurableInstance, Int, Float, Path
+from .items import Object, ConfigurableInstance, Int, Float, Path, String
 
 
 __all__ = [
@@ -13,4 +13,5 @@ __all__ = [
     'Int',
     'Float',
     'Path',
+    'String',
 ]
