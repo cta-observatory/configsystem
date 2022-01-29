@@ -90,6 +90,26 @@ class Configurable:
         return config
 
     @classmethod
+    def get_config_tree(cls):
+        '''
+        Return a tree of all configurable items with this class at the root
+        '''
+        # to avoid circular import
+        from .items import ConfigurableInstance
+
+        tree = {}
+        for name, item in cls.__config__.items():
+            if isinstance(item, ConfigurableInstance):
+                tree[name] = [
+                    {'cls': name, 'config': cls.get_config_tree()}
+                    for name, cls in item.cls.get_nonabstract_subclasses().items()
+                ]
+            else:
+                tree[name] = item
+
+        return tree
+
+    @classmethod
     def get_default_config(cls):
         '''
         Returns the default config of this class as dict.
