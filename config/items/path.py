@@ -38,9 +38,6 @@ class Path(Item):
 
         return value
 
-    def from_string(self, value):
-        return value
-
     def get_default_config(self):
         return self.default
 

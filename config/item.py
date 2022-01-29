@@ -39,11 +39,6 @@ class Item(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def from_string(self, string):
-        '''Create the value from a string representation'''
-        pass
-
-    @abstractmethod
     def get_default(self):
         '''Return a new instance created from the default configuration'''
         pass

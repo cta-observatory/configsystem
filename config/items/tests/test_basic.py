@@ -30,14 +30,6 @@ def test_int_get_default():
     assert item.get_default() == 1
 
 
-def test_int_from_string():
-    from config import Int
-
-    item = Int()
-    assert item.from_string('1') == 1
-    assert item.from_string('-123') == -123
-
-
 def test_int_get_default_config():
     from config import Int
 
@@ -85,11 +77,3 @@ def test_float_get_default_config():
 
     item = Float(default=1.0)
     assert item.get_default_config() == 1.0
-
-def test_float_from_string():
-    from config import Float
-
-    item = Float()
-    assert item.from_string('0.1') == 0.1
-    assert item.from_string('-123.0') == -123.0
-

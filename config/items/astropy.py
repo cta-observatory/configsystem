@@ -48,8 +48,3 @@ class QuantityItem(Object):
                 config_value,
                 'Config value for QuantityItem must be a Quantity, dict or valid input to u.Quantity'
             )
-
-    def from_string(self, string):
-        if string == 'None':
-            return self.validate(None)
-        return self.validate(string)

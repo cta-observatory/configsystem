@@ -39,9 +39,6 @@ class ConfigurableInstance(Item):
 
         return cls(config=config)
 
-    def from_string(self):
-        raise NotImplementedError('Creating Whole Configurable Objects from String is not supported')
-
     def get_default(self):
         return self.from_config(self.get_default_config())
 

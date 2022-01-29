@@ -40,9 +40,6 @@ class Object(Item):
     def get_default_config(self):
         return self.get_default()
 
-    def from_string(self, string):
-        return self.type(string)
-
 
 class Int(Object):
     type = int
