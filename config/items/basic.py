@@ -1,4 +1,5 @@
 from copy import deepcopy
+from operator import index
 
 from ..item import Item
 from ..exceptions import ConfigError
@@ -43,13 +44,33 @@ class Object(Item):
         return self.get_default()
 
 
+class String(Object):
+    type = str
+
+
 class Int(Object):
     type = int
+
+    def validate(self, value):
+
+        # special case for to allow integer floats like 1.0
+        if isinstance(value, float):
+            if value.is_integer():
+                value = int(value)
+
+        # '__index__' means "I am losslessly convertible to an int"
+        if hasattr(value, '__index__'):
+            value = index(value)
+
+        return super().validate(value)
 
 
 class Float(Object):
     type = float
 
+    def validate(self, value):
+        # special casing for things explicitly advertising convertible to float
+        if hasattr(value, '__float__'):
+            value = float(value)
 
-class String(Object):
-    type = str
+        return super().validate(value)

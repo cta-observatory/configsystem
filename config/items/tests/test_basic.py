@@ -9,8 +9,11 @@ def test_int_validate():
     assert item.validate(5) == 5
     assert item.validate(None) is None
 
+    # float with is_integer() == True is allowed
+    assert isinstance(item.validate(5.0), int)
+
     with pytest.raises(ConfigError):
-        item.validate(5.0)
+        item.validate(5.1)
 
     with pytest.raises(ConfigError):
         item.validate('5.0')
@@ -19,6 +22,14 @@ def test_int_validate():
     with pytest.raises(ConfigError):
         item.validate(None)
 
+def test_int_numpy():
+    from config import Int
+    np = pytest.importorskip("numpy")
+
+    item = Int()
+    value = item.validate(np.int32(1))
+    assert isinstance(value, int)
+    assert value == 1
 
 def test_int_get_default():
     from config import Int
@@ -50,8 +61,7 @@ def test_float_validate():
     with pytest.raises(ConfigError):
         item.validate('5.0')
 
-    with pytest.raises(ConfigError):
-        item.validate(5)
+    assert isinstance(item.validate(5), float)
 
     item = Float(default=1.0, allow_none=False)
     with pytest.raises(ConfigError):
